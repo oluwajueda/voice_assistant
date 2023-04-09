@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voiceai/colors.dart';
 
 import 'home.dart';
 
@@ -12,9 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      debugShowCheckedModeBanner: false,
+      title: 'IAnswer',
+      theme: ThemeData.light(useMaterial3: true).copyWith(
+        scaffoldBackgroundColor: Pallete.whiteColor,
+        appBarTheme: const AppBarTheme(backgroundColor: Pallete.whiteColor),
       ),
       home: HomePage(),
     );
