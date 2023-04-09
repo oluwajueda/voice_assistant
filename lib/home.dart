@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:voiceai/colors.dart';
 import 'package:voiceai/feature_box.dart';
+import 'package:voiceai/openai_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,6 +17,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final speechToText = SpeechToText();
   String lastwords = "";
+  final OpenAIService openAIService = OpenAIService();
+
   @override
   void initState() {
     super.initState();
@@ -153,6 +156,8 @@ class _HomePageState extends State<HomePage> {
           if (await speechToText.hasPermission && speechToText.isNotListening) {
             await startListening();
           } else if (speechToText.isListening) {
+            final speech = await openAIService.isArtPromptAPI(lastwords);
+            print(speech);
             await stopListening();
           } else {
             initSpeechToText();
