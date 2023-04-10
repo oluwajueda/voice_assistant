@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:voiceai/colors.dart';
@@ -18,11 +19,18 @@ class _HomePageState extends State<HomePage> {
   final speechToText = SpeechToText();
   String lastwords = "";
   final OpenAIService openAIService = OpenAIService();
+  final flutterTts = FlutterTts();
 
   @override
   void initState() {
     super.initState();
     initSpeechToText();
+    initSpeechToText();
+  }
+
+  Future<void> initTextToSpeech() async {
+    await flutterTts.setSharedInstance(true);
+    setState(() {});
   }
 
   Future<void> initSpeechToText() async {
@@ -46,10 +54,18 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  String? generatedContent;
+  String? generateImageUrl;
+
   @override
   void dispose() {
     super.dispose();
     speechToText.stop();
+    flutterTts.stop();
+  }
+
+  Future<void> systemSpeak(String content) async {
+    await flutterTts.speak(content);
   }
 
   @override
@@ -100,14 +116,16 @@ class _HomePageState extends State<HomePage> {
                 borderRadius:
                     BorderRadius.circular(20).copyWith(topLeft: Radius.zero),
               ),
-              child: const Padding(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
-                  "Good morning, what can I do for you?",
+                  generatedContent == null
+                      ? "Good morning, what can I do for you?"
+                      : generatedContent!,
                   style: TextStyle(
                     fontFamily: "Cera Pro",
                     color: Pallete.mainFontColor,
-                    fontSize: 25,
+                    fontSize: generatedContent == null ? 25 : 18,
                   ),
                 ),
               ),
@@ -157,7 +175,17 @@ class _HomePageState extends State<HomePage> {
             await startListening();
           } else if (speechToText.isListening) {
             final speech = await openAIService.isArtPromptAPI(lastwords);
-            print(speech);
+            if (speech.contains("https")) {
+              generateImageUrl = speech;
+              generatedContent = null;
+              setState(() {});
+            } else {
+              generateImageUrl = null;
+              generatedContent = speech;
+              setState(() {});
+              await systemSpeak(speech);
+            }
+
             await stopListening();
           } else {
             initSpeechToText();
